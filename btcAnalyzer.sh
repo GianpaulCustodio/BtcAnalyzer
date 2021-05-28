@@ -151,7 +151,7 @@ inspect_transaction_url="https://www.blockchain.com/es/btc/tx/"
 inspect_address_url="https://www.blockchain.com/es/btc/address/"
 
 counter=0;
-while getopts "e:h:n" arg; do
+while getopts "e:h:n:" arg; do
 	case $arg in
 	e)exploration_mode=$OPTARG; let counter+=1;; #OPTARG es la variable que ponemos luego del -e |ejm: ./btcAnalyzer.sh -e loquesea
 	h)helpPanel;;
