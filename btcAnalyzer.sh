@@ -138,8 +138,27 @@ function unconfirmed_transactions(){
 	for hash in $hashes; do
 		echo "${hash}_$(echo "$ $(cat ut.tmp | grep "$hash" -A 6 | tail -1 | cut -d 'U' -f1)")_$(cat ut.tmp | grep "$hash" -A 4 | tail -1)_$(cat ut.tmp | grep "$hash" -A 2 | tail -1)" >> ut.table
 	done
-	printTable '_' "$(cat ut.table)" #2 Parametros:  _ ->El delimitador   $(cat ut.table) ->la tabla que necesita para que se genere los cuadros
-	rm ut.t* 2>/dev/null
+
+	cat ut.table | cut -d "_" -f2 | grep -v "Cantidad" | tr -d "$" | sed "s/\,.*//g" | tr -d "."  > money
+        money=0; cat money | while read money_in_line; do
+	        let money+=$money_in_line
+        	echo $money > money.tmp
+        done;
+
+	echo -n "Cantidad Total_" > amount.table  #Como solo es 1fila  se debe poner el -n
+	echo "\$$(printf "%'.d\n" $(cat money.tmp))" >> amount.table
+
+	if [ "$(cat ut.table | wc -l)" != "1" ]; then
+		echo -ne "${yellowColour}"
+	        printTable '_' "$(cat ut.table)" #2 Parametros:  _ ->El delimitador   $(cat ut.table) ->la tabla que necesita para que se genere los cuadros
+        	echo -ne "${endColour}"
+
+		echo -ne "${blueColour}"
+		printTable '_' "$(cat amount.table)"
+		echo -ne "${endColour}"
+		rm ut.* money* amount.table 2>/dev/null
+	fi
+	rm ut.t* money* amount.table 2>/dev/null
 }
 
 
@@ -150,8 +169,7 @@ unconfirmed_transactions="https://www.blockchain.com/es/btc/unconfirmed-transact
 inspect_transaction_url="https://www.blockchain.com/es/btc/tx/"
 inspect_address_url="https://www.blockchain.com/es/btc/address/"
 
-counter=0;
-while getopts "e:h:n:" arg; do
+counter=0; while getopts "e:h:n:" arg; do
 	case $arg in
 	e)exploration_mode=$OPTARG; let counter+=1;; #OPTARG es la variable que ponemos luego del -e |ejm: ./btcAnalyzer.sh -e loquesea
 	h)helpPanel;;
